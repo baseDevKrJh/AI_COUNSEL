@@ -13,11 +13,12 @@ public class Counsel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String counselorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "counselor_id", nullable = false)
+    private User counselor;
 
     @Column(nullable = false)
-    private String customerId;
+    private Long customerId;
 
     @Column(nullable = false, length = 1000)
     private String content;

@@ -46,7 +46,7 @@ public class CounselAnalysisService {
     );
 
     /**
-     * 상담 내용을 분석하여 결과�� 반환합니다.
+     * 상담 내용을 분석하여 결과를 반환합니다.
      */
     public AnalysisResult analyzeCounsel(Counsel counsel) {
         return Optional.ofNullable(counsel)
@@ -66,7 +66,7 @@ public class CounselAnalysisService {
                         // 상담 유형 분류
                         String counselType = classifyCounselType(content);
 
-                        return new AnalysisResult(keywords, sentiment, counselType);
+                        return new AnalysisResult(keywords, counselType, sentiment);
                     } catch (Exception e) {
                         throw new AnalysisException("상담 내용 분석 중 오류가 발생했습니다: " + e.getMessage(), e);
                     }

@@ -2,6 +2,7 @@ package org.aitest.ai_counsel.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -11,15 +12,9 @@ import java.time.LocalDateTime;
 @Schema(description = "상담 등록 요청")
 public class CounselRequest {
 
-    @Schema(description = "상담사 ID", example = "counselor001")
-    @NotBlank(message = "상담사 ID는 필수입니다.")
-    @Size(max = 50, message = "상담사 ID는 50자를 초과할 수 없습니다.")
-    private String counselorId;
-
     @Schema(description = "고객 ID", example = "customer001")
-    @NotBlank(message = "고객 ID는 필수입니다.")
-    @Size(max = 50, message = "고객 ID는 50자를 초과할 수 없습니다.")
-    private String customerId;
+    @NotNull(message = "고객 ID는 필수입니다.")
+    private Long customerId;
 
     @Schema(description = "상담 내용", example = "펀드 상품에 대해 문의드리고 싶습니다.")
     @NotBlank(message = "상담 내용은 필수입니다.")

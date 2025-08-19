@@ -15,11 +15,11 @@ public class CounselResponse {
     @Schema(description = "상담 ID", example = "1")
     private Long id;
 
-    @Schema(description = "상담사 ID", example = "counselor001")
-    private String counselorId;
+    @Schema(description = "상담사 정보")
+    private UserResponse counselor;
 
     @Schema(description = "고객 ID", example = "customer001")
-    private String customerId;
+    private Long customerId;
 
     @Schema(description = "상담 내용", example = "펀드 상품에 대해 문의드리고 싶습니다.")
     private String content;
@@ -45,7 +45,7 @@ public class CounselResponse {
     public static CounselResponse from(Counsel counsel) {
         return CounselResponse.builder()
                 .id(counsel.getId())
-                .counselorId(counsel.getCounselorId())
+                .counselor(UserResponse.from(counsel.getCounselor()))
                 .customerId(counsel.getCustomerId())
                 .content(counsel.getContent())
                 .counselDate(counsel.getCounselDate())

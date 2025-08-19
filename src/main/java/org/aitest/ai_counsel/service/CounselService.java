@@ -38,8 +38,8 @@ public class CounselService {
         return counselRepository.findAll();
     }
 
-    public List<Counsel> getCounselorHistory(String counselorId) {
-        return counselRepository.findByCounselorIdOrderByCounselDateDesc(counselorId);
+    public List<Counsel> getCounselorHistory(Long counselorId) {
+        return counselRepository.findByCounselor_IdOrderByCounselDateDesc(counselorId);
     }
 
     public List<Counsel> getCounselsByPeriod(LocalDateTime start, LocalDateTime end) {
@@ -65,8 +65,8 @@ public class CounselService {
     }
 
     @Transactional
-    public Counsel predictNextCounselByCounselor(String counselorId) {
-        List<Counsel> history = counselRepository.findByCounselorIdOrderByCounselDateDesc(counselorId);
+    public Counsel predictNextCounselByCounselor(Long counselorId) {
+        List<Counsel> history = counselRepository.findByCounselor_IdOrderByCounselDateDesc(counselorId);
         if (history.isEmpty()) {
             throw new InvalidRequestException(ErrorCode.INVALID_INPUT_VALUE);
         }
@@ -74,7 +74,7 @@ public class CounselService {
     }
 
     @Transactional
-    public Counsel predictNextCounselByCustomer(String customerId) {
+    public Counsel predictNextCounselByCustomer(Long customerId) {
         List<Counsel> customerHistory = counselRepository.findByCustomerIdOrderByCounselDateDesc(customerId);
         if (customerHistory.isEmpty()) {
             throw new InvalidRequestException(ErrorCode.INVALID_INPUT_VALUE);

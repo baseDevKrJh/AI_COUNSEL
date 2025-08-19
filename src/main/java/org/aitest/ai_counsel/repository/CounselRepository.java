@@ -9,8 +9,8 @@ import java.util.List;
 
 @Repository
 public interface CounselRepository extends JpaRepository<Counsel, Long> {
-    List<Counsel> findByCounselorIdOrderByCounselDateDesc(String counselorId);
-    List<Counsel> findByCustomerIdOrderByCounselDateDesc(String customerId);
+    List<Counsel> findByCounselor_IdOrderByCounselDateDesc(Long counselorId);
     List<Counsel> findByCounselDateBetween(LocalDateTime start, LocalDateTime end);
     List<Counsel> findByProductInfoContaining(String productInfo);
+    List<Counsel> findByCustomerIdOrderByCounselDateDesc(Long customerId);
 }
