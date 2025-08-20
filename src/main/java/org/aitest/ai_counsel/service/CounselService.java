@@ -1,10 +1,8 @@
 package org.aitest.ai_counsel.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.aitest.ai_counsel.domain.Counsel;
-import org.aitest.ai_counsel.exception.CounselNotFoundException;
-import org.aitest.ai_counsel.exception.ErrorCode;
-import org.aitest.ai_counsel.exception.InvalidRequestException;
 import org.aitest.ai_counsel.repository.CounselRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,87 +12,117 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class CounselService {
 
     private final CounselRepository counselRepository;
-    private final CounselAnalysisService analysisService;
-    private final CounselPredictionService predictionService;
+    private final CounselAnalysisService counselAnalysisService;
 
-    @Transactional
     public Counsel saveCounsel(Counsel counsel) {
-        if (counsel == null) {
-            throw new InvalidRequestException(ErrorCode.INVALID_INPUT_VALUE);
-        }
         return counselRepository.save(counsel);
     }
 
+    @Transactional(readOnly = true)
     public Counsel getCounselById(Long id) {
         return counselRepository.findById(id)
-                .orElseThrow(() -> new CounselNotFoundException(ErrorCode.COUNSEL_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException("Counsel not found with id: " + id));
     }
 
-    public List<Counsel> getAllCounsels() {
+    @Transactional(readOnly = true)
+    public List<Counsel> getCounsels(Long counselorId, Long customerId, LocalDateTime startDate, LocalDateTime endDate) {
+        // 모든 필터 조건이 null인 경우 전체 조회
+        if (counselorId == null && customerId == null && startDate == null && endDate == null) {
+            return counselRepository.findAll();
+        }
+
+        // 조건에 따른 동적 조회
+        if (counselorId != null && customerId != null && startDate != null && endDate != null) {
+            return counselRepository.findByCounselorIdAndCustomerIdAndCounselDateBetween(
+                    counselorId, customerId, startDate, endDate);
+        } else if (counselorId != null) {
+            return counselRepository.findByCounselorId(counselorId);
+        } else if (customerId != null) {
+            return counselRepository.findByCustomerId(customerId);
+        } else if (startDate != null && endDate != null) {
+            return counselRepository.findByCounselDateBetween(startDate, endDate);
+        }
+
         return counselRepository.findAll();
     }
 
+    public void deleteCounsel(Long id) {
+        if (!counselRepository.existsById(id)) {
+            throw new EntityNotFoundException("Counsel not found with id: " + id);
+        }
+        counselRepository.deleteById(id);
+    }
+
+    public Counsel analyzeCounsel(Long id) {
+        Counsel counsel = getCounselById(id);
+
+        try {
+            // AI 분석 서비스를 통해 상담 내용 분석
+            CounselAnalysisService.AnalysisResult analysisResult = counselAnalysisService.analyzeCounsel(counsel);
+
+            // 분석 결과를 문자열로 변환
+            String analysis = String.format("상담 유형: %s\n고객 감정: %s\n주요 키워드: %s",
+                    analysisResult.getCounselType(),
+                    analysisResult.getSentiment(),
+                    String.join(", ", analysisResult.getKeywords()));
+
+            counsel.setAnalysis(analysis);
+            counsel.setPrediction("분석 완료됨");
+
+        } catch (Exception e) {
+            // 분석 실패 시 기본값 설정
+            counsel.setAnalysis("분석 처리 중 오류 발생");
+            counsel.setPrediction("예측 불가");
+        }
+
+        return saveCounsel(counsel);
+    }
+
+    @Transactional(readOnly = true)
     public List<Counsel> getCounselorHistory(Long counselorId) {
-        return counselRepository.findByCounselor_IdOrderByCounselDateDesc(counselorId);
+        return counselRepository.findByCounselorIdOrderByCounselDateDesc(counselorId);
     }
 
+    @Transactional(readOnly = true)
     public List<Counsel> getCounselsByPeriod(LocalDateTime start, LocalDateTime end) {
-        return counselRepository.findByCounselDateBetween(start, end);
+        return counselRepository.findByCounselDateBetweenOrderByCounselDateDesc(start, end);
     }
 
+    @Transactional(readOnly = true)
     public List<Counsel> getCounselsByProduct(String productInfo) {
-        return counselRepository.findByProductInfoContaining(productInfo);
+        return counselRepository.findByProductInfoContainingIgnoreCaseOrderByCounselDateDesc(productInfo);
     }
 
-    @Transactional
-    public Counsel analyzeCounsel(Long counselId) {
-        Counsel counsel = getCounselById(counselId);
-        CounselAnalysisService.AnalysisResult result = analysisService.analyzeCounsel(counsel);
-
-        String analysis = String.format("상담 유형: %s\n고객 감정: %s\n주요 키워드: %s",
-                result.getCounselType(),
-                result.getSentiment(),
-                String.join(", ", result.getKeywords()));
-
-        counsel.setAnalysis(analysis);
-        return counselRepository.save(counsel);
-    }
-
-    @Transactional
-    public Counsel predictNextCounselByCounselor(Long counselorId) {
-        List<Counsel> history = counselRepository.findByCounselor_IdOrderByCounselDateDesc(counselorId);
-        if (history.isEmpty()) {
-            throw new InvalidRequestException(ErrorCode.INVALID_INPUT_VALUE);
-        }
-        return generatePrediction(history);
-    }
-
-    @Transactional
     public Counsel predictNextCounselByCustomer(Long customerId) {
-        List<Counsel> customerHistory = counselRepository.findByCustomerIdOrderByCounselDateDesc(customerId);
-        if (customerHistory.isEmpty()) {
-            throw new InvalidRequestException(ErrorCode.INVALID_INPUT_VALUE);
+        List<Counsel> pastCounsels = counselRepository.findByCustomerIdOrderByCounselDateDesc(customerId);
+
+        if (pastCounsels.isEmpty()) {
+            throw new EntityNotFoundException("No counsel history found for customer: " + customerId);
         }
-        return generatePrediction(customerHistory);
+
+        // 가장 최근 상담을 기반으로 예측
+        Counsel latestCounsel = pastCounsels.get(0);
+
+        // 예측 결과를 새로운 Counsel 객체로 반환 (실제로는 저장하지 않음)
+        Counsel predictedCounsel = new Counsel();
+        predictedCounsel.setCustomerId(customerId);
+        predictedCounsel.setContent("예측된 다음 상담 내용: " + latestCounsel.getProductInfo() + " 관련 후속 상담");
+        predictedCounsel.setPrediction("과거 상담 패턴 기반 예측");
+        predictedCounsel.setCounselDate(LocalDateTime.now().plusDays(7)); // 1주일 후 예측
+        predictedCounsel.setProductInfo(latestCounsel.getProductInfo());
+
+        return predictedCounsel;
     }
 
-    private Counsel generatePrediction(List<Counsel> history) {
-        Counsel latestCounsel = history.get(0);
-        CounselPredictionService.PredictionResult prediction = predictionService.predictNextCounsel(history);
-
-        StringBuilder predictionText = new StringBuilder();
-        predictionText.append(prediction.getPredictedType()).append("\n");
-        predictionText.append(prediction.getDetails()).append("\n");
-        predictionText.append("키워드 빈도:\n");
-        prediction.getTopKeywords().forEach((keyword, frequency) ->
-                predictionText.append(String.format("- %s (%d회)\n", keyword, frequency))
-        );
-
-        latestCounsel.setPrediction(predictionText.toString());
-        return counselRepository.save(latestCounsel);
+    // 권한 체크를 위한 메서드
+    @Transactional(readOnly = true)
+    public boolean isCounselorOfCounsel(Long counselId, String counselorEmail) {
+        return counselRepository.findById(counselId)
+                .map(counsel -> counsel.getCounselor().getEmail().equals(counselorEmail))
+                .orElse(false);
     }
 }
