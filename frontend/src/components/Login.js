@@ -26,10 +26,17 @@ const Login = () => {
 
     try {
       const response = await authAPI.login(credentials);
-      const { token } = response.data;
+      const { token, user } = response.data;
 
       // JWT 토큰을 로컬스토리지에 저장
       localStorage.setItem('token', token);
+
+      // 사용자 정보와 역할 저장
+      localStorage.setItem('user', JSON.stringify({
+        id: user?.id || '',
+        email: user?.email || credentials.email,
+        roles: user?.roles || ''
+      }));
 
       // 상담 목록 페이지로 이동
       navigate('/counsels');

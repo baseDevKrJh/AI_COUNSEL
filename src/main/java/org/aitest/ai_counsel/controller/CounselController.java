@@ -51,7 +51,7 @@ public class CounselController {
         return ResponseEntity.ok(CounselResponse.from(saved));
     }
 
-    @Operation(summary = "상담 내용 목록 조회", description = "상담 내용 목록을 조회합니다.")
+    @Operation(summary = "상담 내용 목록 조회", description = "상담 내용 목록을 조회합니다. 관리자는 전체 상담을, 상담사는 본인의 상담만 조회 가능합니다.")
     @GetMapping
     public ResponseEntity<List<CounselResponse>> getCounsels(
             @Parameter(description = "상담사 ID") @RequestParam(required = false) Long counselorId,
@@ -59,9 +59,26 @@ public class CounselController {
             @Parameter(description = "시작 날짜 (yyyy-MM-dd'T'HH:mm:ss)")
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime startDate,
             @Parameter(description = "종료 날짜 (yyyy-MM-dd'T'HH:mm:ss)")
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime endDate) {
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime endDate,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<Counsel> counsels = counselService.getCounsels(counselorId, customerId, startDate, endDate);
+        User currentUser = userService.getUserByUsername(userDetails.getUsername());
+        List<Counsel> counsels;
+
+        // ADMIN 권한 사용자는 전체 상담 조회 가능 (필터 적용)
+        if (currentUser.getRoles().contains("ROLE_ADMIN")) {
+            counsels = counselService.getCounsels(counselorId, customerId, startDate, endDate);
+        }
+        // COUNSELOR 권한 사용자는 본인의 상담만 조회 가능
+        else {
+            // counselorId가 명시적으로 제공되었고, 현재 사용자의 ID와 다르면 접근 거부
+            if (counselorId != null && !counselorId.equals(currentUser.getId())) {
+                return ResponseEntity.status(403).build(); // Forbidden
+            }
+            // 현재 상담사의 ID로 필터링된 상담 목록 조회
+            counsels = counselService.getCounsels(currentUser.getId(), customerId, startDate, endDate);
+        }
+
         List<CounselResponse> responses = counsels.stream()
                 .map(CounselResponse::from)
                 .collect(Collectors.toList());

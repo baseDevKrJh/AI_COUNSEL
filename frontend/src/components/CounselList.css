@@ -10,6 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .header h1 {
@@ -148,6 +149,55 @@
   font-size: 0.85rem;
 }
 
+.user-info {
+  margin: 0 auto 0 1rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.user-role {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-notice, .counselor-notice {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.admin-notice {
+  background-color: #e6f7ff;
+  border-left: 4px solid #1890ff;
+  color: #0050b3;
+}
+
+.counselor-notice {
+  background-color: #f6ffed;
+  border-left: 4px solid #52c41a;
+  color: #135200;
+}
+
+.counselor-info {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #1890ff;
+  border-top: 1px dotted #e8e8e8;
+  padding-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
@@ -161,5 +211,19 @@
 
   .main-content {
     padding: 1rem;
+  }
+
+  .user-info {
+    margin: 0.5rem 0;
+  }
+
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-notice, .counselor-notice {
+    width: 100%;
+    margin-top: 0.75rem;
   }
 }
