@@ -113,7 +113,7 @@ public class CounselController {
     }
 
     @Operation(summary = "상담 내용 분석", description = "상담 내용을 AI로 분석하고 예측 결과를 반환합니다.")
-    @PostMapping("/{id}/analyze")
+    @GetMapping("/{id}/analysis")
     public ResponseEntity<CounselResponse> analyzeCounsel(@PathVariable Long id,
                                                         @AuthenticationPrincipal UserDetails userDetails) {
         try {

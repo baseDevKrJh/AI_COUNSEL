@@ -1,5 +1,7 @@
 package org.aitest.ai_counsel.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.aitest.ai_counsel.domain.Counsel;
@@ -8,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +21,7 @@ public class CounselService {
 
     private final CounselRepository counselRepository;
     private final CounselAnalysisService counselAnalysisService;
+    private final ObjectMapper objectMapper;
 
     public Counsel saveCounsel(Counsel counsel) {
         return counselRepository.save(counsel);
@@ -64,13 +69,15 @@ public class CounselService {
             // AI 분석 서비스를 통해 상담 내용 분석
             CounselAnalysisService.AnalysisResult analysisResult = counselAnalysisService.analyzeCounsel(counsel);
 
-            // 분석 결과를 문자열로 변환
-            String analysis = String.format("상담 유형: %s\n고객 감정: %s\n주요 키워드: %s",
-                    analysisResult.getCounselType(),
-                    analysisResult.getSentiment(),
-                    String.join(", ", analysisResult.getKeywords()));
+            // 분석 결과를 JSON 형식으로 변환
+            Map<String, Object> analysisMap = new HashMap<>();
+            analysisMap.put("상담 유형", analysisResult.getCounselType());
+            analysisMap.put("고객 감정", analysisResult.getSentiment());
+            analysisMap.put("주요 키워드", analysisResult.getKeywords());
 
-            counsel.setAnalysis(analysis);
+            String analysisJson = objectMapper.writeValueAsString(analysisMap);
+
+            counsel.setAnalysis(analysisJson);
             counsel.setPrediction("분석 완료됨");
 
         } catch (Exception e) {
