@@ -97,16 +97,16 @@
   - [x] 전역 예외 핸들러 구현
   - [x] 커스텀 예외 클래스 정의
   - [x] API 에러 응답 표준화
-- [ ] Profile별 환경 설정
-  - [ ] 개발(dev) 환경 설정
-  - [ ] 검증(test) 환경 설정  
-  - [ ] 운영(prod) 환경 설정
-  - [ ] 환경별 application.yml 분리
-- [ ] JWT 기반 인증 시스템
-  - [ ] JWT 토큰 생성/검증 로직
-  - [ ] 로그인 API 구현
-  - [ ] 인증 필터 구현
-  - [ ] 사용자 관리 기능
+- [x] Profile별 환경 설정
+  - [x] 개발(dev) 환경 설정
+  - [x] 검증(test) 환경 설정  
+  - [x] 운영(prod) 환경 설정
+  - [x] 환경별 application.yml 분리
+- [x] JWT 기반 인증 시스템
+  - [x] JWT 토큰 생성/검증 로직
+  - [x] 로그인 API 구현
+  - [x] 인증 필터 구현
+  - [x] 사용자 관리 기능
 
 ### 🚀 고도화 계획
 - [x] OpenAI API 연동으로 분석 정확도 향상 (기본 예제 추가)
@@ -116,8 +116,49 @@
 
 ## 7. 브라우저 접속 정보
 
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
 - **H2 Database Console**: http://localhost:8080/h2-console
   - JDBC URL: `jdbc:h2:mem:counseldb`
   - User Name: `sa`
   - Password: (빈칸)
+
+## 8. 추가 변경 및 최신화 내역
+
+- 데이터베이스를 H2에서 MariaDB로 변경
+- MariaDB 설정 및 도커 실행법 추가
+- application.properties 주요 설정 반영
+- Swagger UI 경로 최신화: http://localhost:8080/swagger-ui/index.html
+- H2 관련 내용 제거, MariaDB 접속 정보로 대체
+- 환경별 application.yml 분리 및 dev/test/prod 환경 설정 완료
+- JWT 기반 인증 시스템 및 관련 API 구현 완료
+- README 최신화 (2025-08-20)
+
+## 9. 앞으로 해야 할 일 (프론트엔드)
+
+1. **Front단 구현**
+   - [x] React.js 기반 프론트엔드 프로젝트 생성 및 환경 설정
+2. **React.js 사용**
+   - [x] React.js로 SPA 구조 설계 및 개발
+3. **Swagger API 문서 기반 주요 페이지 개발**
+   - [x] 로그인 페이지: JWT 인증 API 연동, 사용자 로그인 기능 구현
+   - [x] 상담 목록 페이지: 상담 목록 조회 API 연동, 상담 리스트 표시
+   - [x] 상담 상세 내역 페이지: 상담 상세 조회 API 연동, 상담 정보 및 분석 버튼 표시
+   - [x] 상담 입력 페이지: 상담 등록 API 연동, 신규 상담 입력 및 저장 기능 구현
+4. **상담 상세 내역 페이지 기능**
+   - [x] 상담 분석 버튼 추가: 클릭 시 상담 분석 API 호출, 분석 결과 화면에 표시
+
+> ✅ **프론트엔드 개발 완료!** `/frontend` 폴더에 React.js로 모든 기능이 구현되었습니다. 백엔드 Swagger API 문서를 기반으로 각 페이지별 기능을 성공적으로 구현했습니다.
+
+### 🎉 구현 완료된 프론트엔드 기능들:
+- React.js + React Router 기반 SPA 구조
+- JWT 인증 시스템 (로그인/로그아웃)
+- 상담 CRUD 기능 (목록/상세/입력)
+- 상담 분석 API 연동 및 결과 표시
+- 반응형 웹 디자인
+- API 통신 및 에러 처리
+- 보안 라우팅 (인증된 사용자만 접근 가능)
+
+### 🚀 실행 방법:
+1. 백엔드: `./mvnw spring-boot:run` (포트 8080)
+2. 프론트엔드: `cd frontend && npm start` (포트 3000)
+3. 브라우저: http://localhost:3000
