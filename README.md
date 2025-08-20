@@ -162,3 +162,69 @@
 1. 백엔드: `./mvnw spring-boot:run` (포트 8080)
 2. 프론트엔드: `cd frontend && npm start` (포트 3000)
 3. 브라우저: http://localhost:3000
+
+## 10. API 문서 (Swagger)
+
+### API 문서 접속 방법
+
+백엔드 서버가 실행된 상태에서 다음 URL을 통해 API 문서에 접근할 수 있습니다:
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
+- **OpenAPI 스펙 (JSON)**: http://localhost:8080/v3/api-docs
+- **OpenAPI 스펙 (YAML)**: http://localhost:8080/v3/api-docs.yaml
+
+### API 주요 그룹
+
+API 문서는 다음과 같은 주요 그룹으로 구성되어 있습니다:
+
+1. **인증 API**
+   - 로그인: `POST /api/login` - JWT 토큰 발급
+   - 회원가입: `POST /api/signup` - 새 사용자 등록
+
+2. **상담 관리 API**
+   - 상담 등록: `POST /api/counsels` - 새 상담 내역 저장
+   - 상담 목록 조회: `GET /api/counsels` - 권한에 따른 상담 목록 조회 (관리자: 전체, 상담사: 본인 담당)
+   - 상담 상세 조회: `GET /api/counsels/{id}` - 특정 상담 상세 정보
+   - 상담 수정: `PUT /api/counsels/{id}` - 기존 상담 내용 수정
+   - 상담 삭제: `DELETE /api/counsels/{id}` - 상담 내역 삭제
+   - 상담 내용 분석: `GET /api/counsels/{id}/analysis` - AI 기반 상담 내용 분석
+   - 다음 상담 예측: `GET /api/counsels/{customerId}/prediction` - 고객별 다음 상담 예측
+   - 상담사별 조회: `GET /api/counsels/counselor/{counselorId}` - 특정 상담사의 상담 내역 (관리자 전용)
+   - 기간별 조회: `GET /api/counsels/period` - 지정 기간 내 상담 내역
+   - 상품별 조회: `GET /api/counsels/product` - 특정 상품 관련 상담 내역
+
+### API 인증 방식
+
+모든 API(로그인/회원가입 제외)는 JWT 기반 인증이 필요합니다:
+
+1. 로그인 API를 통해 JWT 토큰을 발급받습니다.
+2. 모든 API 요청 시 HTTP 헤더에 다음과 같이 토큰을 포함합니다:
+   ```
+   Authorization: Bearer {발급받은_JWT_토큰}
+   ```
+
+### 권한별 API 접근 제한
+
+- **ROLE_ADMIN**: 모든 API에 접근 가능, 모든 상담사의 상담 내역 조회 가능
+- **ROLE_COUNSELOR**: 본인이 담당한 상담 내역만 접근 가능
+
+### API 문서 활용 예시
+
+Swagger UI에서는 다음과 같은 작업을 수행할 수 있습니다:
+1. 각 API 엔드포인트 테스트 (Try it out 기능)
+2. 요청/응답 모델 확인
+3. API 매개변수 및 응답 코드 확인
+4. JWT 인증 토큰 설정 및 테스트
+
+### API 스펙 추출
+
+백엔드 서버가 실행 중인 상태에서 다음 명령어로 API 스펙을 다운로드할 수 있습니다:
+
+```bash
+# JSON 형식으로 다운로드
+curl -o api-docs.json http://localhost:8080/v3/api-docs
+
+# YAML 형식으로 다운로드
+curl -o api-docs.yaml http://localhost:8080/v3/api-docs.yaml
+```
+
+다운로드한 API 스펙은 Swagger Editor(https://editor.swagger.io/)에서 열어 확인하거나 다양한 형식(HTML, PDF 등)으로 변환할 수 있습니다.
